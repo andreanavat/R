@@ -1,0 +1,512 @@
+))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1)
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1)
+(85044)/156748
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}"))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# Calculate the First Time Period (Percentage Change)
+real_estate_periods <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+2:(Y2-Y1)
+data %>%
+filter(Year == Year[2] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data %>%
+filter(Year == Y1 | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[2] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}"))
+(73281)/168511
+data %>%
+filter(Year == Year[3] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the all the remaining Time Periods
+real_estate_periods_n <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}"))
+data %>%
+filter(Year == Year[3] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[3] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}"))
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[2] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}"))
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[4] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}"))
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+real_estate_periods
+real_estate_periods_n
+# Calculate the all the remaining Time Periods
+real_estate_periods_n <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+real_estate_periods_n
+rm(list = ls())
+# Percentage Change Function ----
+periods_PC <- function(data, Y1, Y2, organize ="FALSE") {
+#> The following equation (PC <- (X2 - X1)/X1) will be used to calculate the percent change in equity
+#> for different time periods for each of the zip codes in the data set.
+#> Where "PC" is the Percentage Change, "X1" is the initial value, and "X2" is the Final Value.
+#> With this function, we are seeking to understand what time periods provide the
+#> highest gains in equity for a specific zip code in any given time frame.
+# Testing parameters
+data <- Zillow_PC
+Y1 <- 2000
+Y2 <- 2022
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Y1 | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the First Time Period (Percentage Change)
+real_estate_periods <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# For loop to automate the calculation on the remaining periods
+for (i in 2:(Y2-Y1)) {
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[i] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the all the remaining Time Periods
+real_estate_periods_n <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# Store each new data frame by row
+real_estate_periods <- rbind(real_estate_periods, real_estate_periods_n)
+}
+# Provide extra functionality to the user to arrange the data based on the percentage change column
+if (organize == "TRUE") {
+period_1 <- real_estate_periods %>% arrange(desc(PC))
+return(period_1)
+}
+else {return(real_estate_periods)}
+}
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022)
+## ____________________________________
+##
+## Script name: Funciones
+##
+## Purpose of script:
+##
+## Prerequisites: NA
+##
+## Parameters: None.
+##
+## Results:
+##
+## Return codes:
+##                  0 - Success: xxx1
+##                  1 - Error  : xxx2
+##                  2 - Error  : xxx3
+##                  3 - Error  : xxx4
+##
+## Author: CITMOS
+##
+## Date Created: 2022-10-4
+##
+## Copyright (c) CITMOS, 2022
+## Email: CITMOS1@outlook.com
+## _______________________________________________
+## Notes:
+##
+##
+## _______________________________________________
+##
+## M O D I F I C A T I O N   H I S T O R Y
+##
+## 02FEB2023    person0
+## Changes:     The logic of Function periods_PC() has been modified.
+##
+##_______________________________________________
+# Packages
+library(readxl)
+library(tidyverse)
+library(naniar)
+library(lubridate)
+library(stringr)
+library(fs)
+library(scales)
+source("04_Manipulacion_De_Datos_Data_wrangling/Zillow_and_Employment_Data_Review.R")
+# Testing function real_estate_periods ----
+real_estate_periods <- periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022) # , organize = "TRUE"
+real_estate_periods
+View(real_estate_periods)
+View(real_estate_periods)
+# Testing function real_estate_periods ----
+real_estate_periods <- periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022, organize = "TRUE")
+real_estate_periods
+View(real_estate_periods)
+#> now we can use the real_estate_periods() function and identify the best and worst periods
+#> per zip code
+max_period <- real_estate_periods %>%
+group_by(City_zip) %>%
+summarise(selection = PC  %>% max()) %>% arrange(desc(selection))
+View(max_period)
+min_period <- real_estate_periods %>%
+group_by(City_zip) %>%
+summarise(selection = PC  %>% min()) %>% arrange(selection)
+View(min_period)
+periods_PC(data = Zillow_PC, Y1 = 2005, Y2 = 2022, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2001, Y2 = 2011, organize = "TRUE")
+data <- Zillow_PC
+Y1 <- 2000
+Y2 <- 2022
+# Testing function real_estate_periods ----
+real_estate_periods <- periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022, organize = "TRUE")
+real_estate_periods
+rm(list = ls())
+# Packages
+library(readxl)
+library(tidyverse)
+library(naniar)
+library(lubridate)
+library(stringr)
+library(fs)
+library(scales)
+source("04_Manipulacion_De_Datos_Data_wrangling/Zillow_and_Employment_Data_Review.R")
+# Percentage Change Function ----
+periods_PC <- function(data, Y1, Y2, organize ="FALSE") {
+#> The following equation (PC <- (X2 - X1)/X1) will be used to calculate the percent change in equity
+#> for different time periods for each of the zip codes in the data set.
+#> Where "PC" is the Percentage Change, "X1" is the initial value, and "X2" is the Final Value.
+#> With this function, we are seeking to understand what time periods provide the
+#> highest gains in equity for a specific zip code in any given time frame.
+#> when was the best time to buy if you decided to sell in 2022.
+# Testing parameters
+# data <- Zillow_PC
+# Y1 <- 2000
+# Y2 <- 2022
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Y1 | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the First Time Period (Percentage Change)
+real_estate_periods <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# For loop to automate the calculation on the remaining periods
+for (i in 2:(Y2-Y1)) {
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Year[i] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the all the remaining Time Periods
+real_estate_periods_n <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# Store each new data frame by row
+real_estate_periods <- rbind(real_estate_periods, real_estate_periods_n)
+}
+# Provide extra functionality to the user to arrange the data based on the percentage change column
+if (organize == "TRUE") {
+period_1 <- real_estate_periods %>% arrange(desc(PC))
+return(period_1)
+}
+else {return(real_estate_periods)}
+}
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2003, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2004, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2005, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2007, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2009, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2003, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2005, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2010, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2002, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2005, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2009, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2014, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2009, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2010, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2005, Y2 = 2010, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2005, Y2 = 2010, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022, organize = "TRUE")
+periods_PC(data = Zillow_PC, Y1 = 2010, Y2 = 2022, organize = "TRUE")
+# Testing parameters
+data <- Zillow_PC
+Y1 <- 2005
+Y2 <- 2014
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Y1 | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data_ini
+data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# Calculate the First Time Period (Percentage Change)
+real_estate_periods <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+2:(Y2-Y1)
+data %>%
+filter(Year == Year[2] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+data %>%
+filter(Year == Y1 | Year == Y2)
+data %>%
+filter(Year => Y1 | Year <= Y2)
+data %>%
+filter(Year >= Y1 | Year <= Y2)
+Y1
+data %>%
+filter(Year >= Y1 & Year <= Y2)
+data %>%
+filter(Year >= Y1 & Year <= Y2) %>%
+filter(Year == Year[2] | Year == Y2)
+rm(list = ls())
+# Packages
+library(readxl)
+library(tidyverse)
+library(naniar)
+library(lubridate)
+library(stringr)
+library(fs)
+library(scales)
+source("04_Manipulacion_De_Datos_Data_wrangling/Zillow_and_Employment_Data_Review.R")
+# City_zip_uniq_20PC <- (Zillow_PC %>% select(City_zip) %>% unique() %>% nrow() * .20) %>% round(digits = 0)
+# Percentage Change Function ----
+periods_PC <- function(data, Y1, Y2, organize ="FALSE") {
+#> The following equation (PC <- (X2 - X1)/X1) will be used to calculate the percent change in equity
+#> for different time periods for each of the zip codes in the data set.
+#> Where "PC" is the Percentage Change, "X1" is the initial value, and "X2" is the Final Value.
+#> With this function, we are seeking to understand what time periods provide the
+#> highest gains in equity for a specific zip code in any given time frame.
+#> when was the best time to buy if you decided to sell in 2022.
+# Testing parameters
+# data <- Zillow_PC
+# Y1 <- 2005
+# Y2 <- 2014
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year == Y1 | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the First Time Period (Percentage Change)
+real_estate_periods <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Y1 ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Y1}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# For loop to automate the calculation on the remaining periods
+for (i in 2:(Y2-Y1)) {
+# Select First Period
+# Select only the require data
+data_ini <- data %>%
+filter(Year >= Y1 & Year <= Y2) %>%
+filter(Year == Year[i] | Year == Y2) %>%
+select(City_zip:Z_Home_Value_Index)
+# Calculate the all the remaining Time Periods
+real_estate_periods_n <-  data_ini %>%
+mutate(lag1 = lag(x = Z_Home_Value_Index, n = 1)) %>%
+mutate(lag1 = case_when(
+Year == Year[1] ~ Z_Home_Value_Index,
+TRUE ~ lag1
+)) %>%
+mutate(diff   = Z_Home_Value_Index - lag1) %>%
+mutate(PC     = diff/lag1) %>%
+mutate(PC_ch  = scales::percent(PC)) %>%
+mutate(time_period = str_glue("{Year[1]}-{Y2}")) %>%
+filter(Year == Y2) %>% select(-Year)
+# Store each new data frame by row
+real_estate_periods <- rbind(real_estate_periods, real_estate_periods_n)
+}
+# Provide extra functionality to the user to arrange the data based on the percentage change column
+if (organize == "TRUE") {
+period_1 <- real_estate_periods %>% arrange(desc(PC))
+return(period_1)
+}
+else {return(real_estate_periods)}
+}
+periods_PC(data = Zillow_PC, Y1 = 2010, Y2 = 2022, organize = "TRUE")
+# Testing function real_estate_periods ----
+real_estate_periods <- periods_PC(data = Zillow_PC, Y1 = 2000, Y2 = 2022, organize = "TRUE")
+View(real_estate_periods)
+View(real_estate_periods)

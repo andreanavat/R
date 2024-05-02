@@ -1,0 +1,355 @@
+# Core
+library(tidyverse)
+library(tidyquant)
+library(lubridate)
+library(leaflet)
+library(plotly)
+library(readxl)
+library(tidyverse)
+library(broom)
+library(umap)
+library(ggrepel)
+library(tidyquant)
+library(httr)
+library(jsonlite)
+library(scales)
+library(naniar) # helps with missing values
+
+# working directory should be at C:/Users/willi/OneDrive/R_Scripts
+getwd()
+setwd(dir = "C:/Users/willi/OneDrive/R_Scripts")
+inflation_data <- read_delim(file = "inflationData.txt")
+inflation_data %>% glimpse()
+
+ 
+inflation_data <- inflation_data %>% edit()
+
+# 4.7 % inflation was added to 2021 ave inflation
+inflation_of_2022_so_far <- inflation_data %>% select(YEAR:JUN) %>% filter(YEAR == 2022) %>% select(-YEAR) %>% as_vector() %>% mean()
+
+write_delim(inflation_data, file = "inflationData.txt")
+
+g <- inflation_data  %>% select(YEAR, AVE) %>% 
+  mutate(label_text = str_glue("Year: {YEAR}
+                                Inflation: {AVE}")) %>%
+  ggplot(aes(x = YEAR, y = AVE)) + 
+  geom_jitter(aes(text = label_text), width = 0.1, color = "#2c3e50", alpha = 0.5) +
+  geom_line() +
+  labs(title = "Historical Inflation Rates: 1914-2022", x = "Year", y = "Inflation") +
+  theme_tq()
+
+library(plotly)
+
+ggplotly(g, tooltip = "text")
+
+######
+inflation_data <- inflation_data %>% select(-AVE) %>% gather(key = "Month", value = "Inflation", -YEAR) %>% 
+ mutate(YEAR = YEAR %>% as.character())
+
+inflation_data$Year_Month <- str_c(inflation_data$YEAR, inflation_data$Month)
+
+gg <- inflation_data %>% select(Year_Month, Inflation) %>%
+  mutate(label_text = str_glue("Year_Month: {Year_Month}
+                                Inflation: {Inflation}")) %>%
+  ggplot(aes(x = Year_Month, y = Inflation)) + 
+  geom_jitter(aes(text = label_text), width = 0.1, color = "#2c3e50", alpha = 0.5) +
+  geom_line() +
+  labs(title = "Historical Inflation Rates: 1914-2021", x = "Year_Month", y = "Inflation")
+
+library(plotly)
+
+ggplotly(gg, tooltip = "text")
+
+  
+
+rent1 <- c(1000, 1000, 1000, 1000, 1000, 1000, 1000,1000, 1000, 1000,1000, 1000)
+rent2 <- c(1150, 1150, 1150, 1150, 1150, 1150, 1150,1150, 1150,1150,1150, 1150)
+rent3 <- c(0, 0, 1200, 1200, 1200, 1200, 1200,1200, 1200,1200,1200, 1200)
+time <- c("JAN",  "FEB",  "MAR",  "APR",  "MAY",  "JUN",  "JUL",  "AUG",  "SEP",  "OCT",  "NOV",  "DEC")
+
+data_rent <- cbind(time,rent1, rent2, rent3) %>% as_tibble()
+data_rent %>% mutate(rent1 = rent1 %>% as.numeric(),
+                     rent2 = rent2 %>% as.numeric(),
+                     rent3 = rent3 %>% as.numeric()) %>%
+  mutate(rent1_sum = rent1 %>% sum(),
+         rent2_sum = rent2 %>% sum(),
+         rent3_sum = rent3 %>% sum())
+
+
+### old
+attach(inflationrates)# the data is located in my old flashdrive
+c<-seq(-0.4,3.8, by = 0.1)
+change_percentage<-max(c)-min(c)# inflation was 3.8 before the crash. then, it went down to -0.4 transforming a period of inflation to deflation. 
+
+(10/304.1)*100 #numeber of poeple that lost their houses in 2008 / population in us in 2007 304.1 m
+(17.5/323.1)*100 # of cars sold in 2016 17.5m,...., number of people in us in 2016 323.1
+
+
+par(mfrow=c(3,2)) 
+plot(YEAR[69:103],JAN[69:103],col="blue",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION" ,main = "JAN of 1969 to 2016")
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop JAN 1969
+x<-mean(JAN[69:103])
+a2<-3/(1.128*sqrt(length(JAN[69:103])))
+xx<-sort(JAN[69:103],decreasing = TRUE)
+z<-sort(JAN[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 JAN
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],JAN[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US JAN 1969 - 2016 CONTROL CHART X_BAR")
+lines(YEAR[69:103],JAN[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+plot(YEAR[69:103],MAR[69:103],col="red",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION",main = "MAR of 1969 to 2016" )
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop MAR 1969
+x<-mean(MAR[69:103])
+a2<-3/(1.128*sqrt(length(MAR[69:103])))
+xx<-sort(MAR[69:103],decreasing = TRUE)
+z<-sort(MAR[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 MAR
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],MAR[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN UD MAR 1969-2016  CONTROL CHART X_BAR")
+lines(YEAR[69:103],MAR[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+plot(YEAR[69:103],MAY[69:103],col="black",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION",main = "MAY of 1969 to 2016" )
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop MAY 1969
+x<-mean(MAY[69:103])
+a2<-3/(1.128*sqrt(length(MAY[69:103])))
+xx<-sort(MAY[69:103],decreasing = TRUE)
+z<-sort(MAY[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 MAY
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],MAY[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US MAY 1969 - 2016 CONTROL CHART X_BAR")
+lines(YEAR[69:103],MAY[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+plot(YEAR[69:103],JUL[69:103],pch="J",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION",main = "JUL of 1969 to 2016" )
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop JUL 1969
+x<-mean(JUL[69:103])
+a2<-3/(1.128*sqrt(length(JUL[69:103])))
+xx<-sort(JUL[69:103],decreasing = TRUE)
+z<-sort(JUL[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 JUL
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],JUL[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US JUL 1969- 2016 CONTROL CHART X_BAR")
+lines(YEAR[69:103],JUL[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+plot(YEAR[69:103],SEP[69:103],pch="S",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION",main = "SEP of 1969 to 2016" )
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop SEP 1969
+x<-mean(SEP[69:103])
+a2<-3/(1.128*sqrt(length(SEP[69:103])))
+xx<-sort(SEP[69:103],decreasing = TRUE)
+z<-sort(SEP[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 SEP
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],SEP[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US SEP 1969 - 2016 CONTROL CHART X_BAR")
+lines(YEAR[69:103],SEP[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+
+
+plot(YEAR[69:103],NOV[69:103],pch="N",ylim =c(0,6),xlim = c(1985,2015),xlab = "YEAR",ylab = "INFLATION & DEFLATION",main = "NOV of 1969 to 2016" )
+lines(YEAR[69:103],AVE[69:103],type="l")
+
+#loop NOV 1969
+x<-mean(NOV[69:103])
+a2<-3/(1.128*sqrt(length(NOV[69:103])))
+xx<-sort(NOV[69:103],decreasing = TRUE)
+z<-sort(NOV[69:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# control chart since 1969 NOV
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],NOV[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US NOV 1969 - 2016 CONTROL CHART X_BAR")
+lines(YEAR[69:103],NOV[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+par(mfrow=c(1,1))
+plot(YEAR[1:103],AVE[1:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US SINCE 1914")
+lines(YEAR[1:103],AVE[1:103],type="l")
+abline(h = 0)
+plot(YEAR[69:103],AVE[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US SINCE 1969")
+lines(YEAR[69:103],AVE[69:103],type="l")
+abline(h = 0)
+
+#loop 1969
+x<-mean(AVE[69:103])
+a2<-3/(1.128*sqrt(length(AVE[69:103])))
+xx<-sort(AVE[69:103],decreasing = TRUE)
+z<-sort(AVE[69:103])
+avrange<-c()
+  for(i in 1:length(xx)){
+    
+    xxx<-((xx[i])-(z[i]))
+    
+    avrange<-c(avrange,xxx)
+    
+    
+  }
+# control chart since 1969
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[69:103],AVE[69:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US SINCE 1969 CONTROL CHART X_BAR")
+lines(YEAR[69:103],AVE[69:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+#loop 1914
+x<-mean(AVE[1:103])
+a2<-3/(1.128*sqrt(length(AVE[1:103])))
+xx<-sort(AVE[1:103],decreasing = TRUE)
+z<-sort(AVE[1:103])
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+#control chart since 1914
+
+R_bar<-sum(avrange[1:18])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(YEAR[1:103],AVE[1:103],col="red",xlab = "YEAR",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US SINCE 1914 CONTROL CHART X_BAR")
+lines(YEAR[1:103],AVE[1:103],type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+#1914 to 2016 box plot
+par(mfrow=c(1,2))
+boxplot(AVE[1:103],main = "1914 to 2016")#since 1914
+median(AVE[1:103])#since 1914
+#1969 to 2016 box plot
+boxplot(AVE[69:103],main="1969 to 2016")#since 1969
+median(AVE[69:103])#since 1969
+
+#YEAR 2017
+Last_year<-c(2.5,2.7,2.4,2.2,1.9,1.6)
+x<-mean(Last_year)
+a2<-3/(1.128*sqrt(length(Last_year)))
+xx<-sort(Last_year,decreasing = TRUE)
+z<-sort(Last_year)
+avrange<-c()
+for(i in 1:length(xx)){
+  
+  xxx<-((xx[i])-(z[i]))
+  
+  avrange<-c(avrange,xxx)
+  
+  
+}
+# 
+par(mfrow=c(1,1))
+R_bar<-sum(avrange[1:3])/length(avrange)
+UCL<-x+a2*R_bar
+LCL<-x-a2*R_bar
+plot(Last_year,col="red",xlab = "MONTHS",ylab = "AVE INFLATION & DEFLATION", main = "AVE INFLATION & DEFLATION IN US 2017 CONTROL CHART X_BAR")
+lines(Last_year,type="l")
+abline(h = UCL)
+abline(h = LCL)
+abline(h = 0)
+abline(h = x)
+
+
+
+
+    

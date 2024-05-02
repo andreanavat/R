@@ -1,0 +1,4 @@
+"0","source(""../04_Manipulacion_De_Datos_Data_wrangling/Quantiles_and_counts_per_zipCode.r"")"
+"2","Warning: cannot open file '01_Informacion_Data/Rental_Listing_Data/Rental_Listing.R': No such file or directory"
+"2","Error in readRDS(con, refhook = refhook) : cannot open the connection
+"

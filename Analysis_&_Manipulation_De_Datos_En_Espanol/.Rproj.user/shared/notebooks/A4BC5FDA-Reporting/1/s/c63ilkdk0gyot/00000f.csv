@@ -1,0 +1,3 @@
+"0","library(DT)"
+"0","# Use DT::datatable() to create a dynamic table"
+"0","datatable(price_group_counts_wide, options = list(pageLength = 10),filter = ""top"")"

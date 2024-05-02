@@ -1,0 +1,114 @@
+## ____________________________________
+##
+## Script name: Pop_Data_wrangling
+##
+## Purpose of script: script calculates the year-over-year percentage change in population count
+##
+## Prerequisites: source file data_import_script is req. 
+##
+## Parameters: None.
+##
+## Results: NA 
+##
+## Return codes: 
+##                  0 - Success: xxx1
+##                  1 - Error  : xxx2
+##                  2 - Error  : xxx3
+##                  3 - Error  : xxx4
+##
+## Author: IDSA
+##
+## Date Created: 2023-08-06
+##
+## Copyright (c) IDSA, 2023
+## Email: <email>@IDSA.com
+## ______________________________________________________________________
+## Notes:
+##
+##> This script imports population data. 
+##> The data_import_script.R file is sourced to import the required data.   
+##> The script performs data transformations that isolate the zip codes from the data,
+##> and calculates the year-over-year percentage change in population count. 
+##
+## ______________________________________________________________________
+##
+## M O D I F I C A T I O N   H I S T O R Y
+##
+## 06AUG2023    person0
+## Changes:     Initial Version.
+##
+## 06AUG2023    person1
+## Changes:     - Changes xxx
+##
+## 07AUG2023    person2
+## Changes:     - Removed xxx
+##              - Start xxx
+##
+## 08AUG2023    person3
+## Changes:     - Errors are redirected to xxxx
+##
+##                
+##
+##________________________________________________________________________
+
+# Packages 
+library(tidyverse)
+library(naniar)
+library(lubridate)
+library(stringr)
+library(fs)
+library(scales)
+
+# Importing the function data_import_script.R
+source("01_Informacion_Data/data_import_script.R")
+
+# Importing population data
+pop_data <- data_import(dataSource = "Population", unzipData = 0)
+
+# Selecting relevant columns and renaming them
+pop_data <- pop_data %>% select(Geographic.Area.Name, Estimate..SEX.AND.AGE..Total.population, Year)
+
+# pop_data %>% glimpse()
+# pop_data %>% set_names(nm = c("Loc_Zip", "Pop_Count", "Year")) %>% glimpse()
+# colnames(pop_data)[1] <- "new_name"
+
+colnames(pop_data) <-  c("Loc_Zip", "Pop_Count", "Year")
+
+# Extracting Loc_Zip_id and Loc_Zip_id_c from Loc_Zip
+pop_data <- pop_data %>% 
+    mutate(Loc_Zip_id   = Loc_Zip %>% str_sub(start = 6, end = 11) %>% str_trim()) %>%
+    mutate(Loc_Zip_id_c = Loc_Zip_id %>% str_count() %>% as.character())
+
+# Selecting desired columns
+pop_data <- pop_data %>% select(Pop_Count:Loc_Zip_id)
+
+# checking for missing values in the pop_data data 
+# gg_miss_var(pop_data)
+
+# Calculating population count YoY percentage change
+Pop_PC <- pop_data %>%
+    group_by(Loc_Zip_id, Year) %>%
+    summarise(Pop_Count = Pop_Count) %>%
+    ungroup() %>%
+    mutate(Pop_Count_Lag1 = lag(x = Pop_Count, n = 1)) %>%
+    mutate(Pop_Count_Lag1 = case_when(
+        
+        
+        Year == min(pop_data$Year) ~ Pop_Count,
+        TRUE                       ~ Pop_Count_Lag1
+    )) %>%
+    mutate(Pop_Count_diff       = Pop_Count  - Pop_Count_Lag1) %>%
+    mutate(Pop_Count_PC_YoY     = Pop_Count_diff/Pop_Count_Lag1) %>%
+    mutate(Pop_Count_PC_YoY_chr = scales::percent(Pop_Count_PC_YoY))
+
+# Remove raw data
+rm(pop_data)
+
+# checking for missing values in the Pop_PC data 
+# gg_miss_var(Pop_PC)
+
+# Removing Pop_PC Missing values
+Pop_PC <- Pop_PC %>% na.omit()
+
+# checking that the missing values were removed from Pop_PC data 
+# gg_miss_var(Pop_PC)

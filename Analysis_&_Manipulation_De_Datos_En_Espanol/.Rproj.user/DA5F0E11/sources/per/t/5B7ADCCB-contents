@@ -1,0 +1,985 @@
+---
+title: "Real State Analysis"
+author: "IDSA"
+date: "2023-09-02"
+output: 
+  html_document:
+  css: styles.css
+runtime: shiny
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(gt)
+library(dplyr)
+library(readr)
+library(tidyverse)
+library(scales)
+library(plotly)
+library(FinancialMath)
+library(glue)
+```
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### Background
+</div>
+
+This report was one of the written reports I created for one of my clients, David, and I’d like to present it here. I believe that data analytics can help to make better financial decisions not only for you, but as well for others. David, like many others, yearned for a smart way to invest his money. He thought about investing in a rental property to diversify his cash. But there was a problem—he didn't know where to start. Real estate seemed complicated, and he felt lost with all the options. I can’t share his financial data here, but I will demonstrate a segment of the analysis on how I used public data to create a recommendation plan for him to invest in his first rental property. I hope you enjoy  it.
+
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### Talking Points
+</div>
+
+- **(1) Zooming in on High-Rent Zones in metro Detroit based on rent prices from 2019 to 2023.** 
+  + **Approach & Logic of Analysis**
+  + **High-rent Demographics:** Understanding the type of people attracted by high-rent areas.
+  + **Marketing Implications:** How these demographics influence future marketing.
+  + **Tabulation:** Table showcasing cities and zip codes meeting the criteria.
+  + **Grouping Strategy:** How segmenting units can assist in zip code selection.
+  + **Areas of Focus: _Location_ _Location_ _Location_** 
+<br><br>
+
+- **(2) Financial Implications**
+  + **Value & Gains:** Discussion about property values and expected capital gains.
+  + **Risks & Rates:** Insights about vacancy and default rates in high-rent areas.
+  + **Financial Trade-offs:** Highlighting the financial risks in high-rent areas.
+<br><br>
+
+- **(3) Data Insights Through Visualization**
+  + **Boxplot: **  simple graphical representation of the distribution of a dataset
+  + **Boxplot Clustering:**  Presenting data with different scales can help you tell a more nuanced story
+  + **Boxplot Clustering Single Scale:** Helps to make direct visual comparisons between the distributions of rent prices for each year
+<br><br>
+
+- **(4) Modeling & Prediction**
+  + **Methodology:** Use of the Linear Regression Model for rent estimation.
+  + **Crime Grades by Zip Code** Insights into the safety and security of potential investment locations
+  + **Results & Parameters:** Model outcomes focusing on number of bathrooms, bedrooms, SqFt, year, and zip code.
+<br><br>
+
+- **(5) Median Rent Increase Year over Year (ZipCode 48220)**
+- **(6) Net Present Value (NPV) A Tale of Data-Driven Insights**
+- **(7) Mini Rmarkdowm App to Calculate Internal Rate of Return (IRR)**
+
+
+<br>
+
+```{r, echo=FALSE, message=FALSE,  warning=FALSE}
+# # running code chunks. path based on project location
+ # source(file = "04_Manipulacion_De_Datos_Data_wrangling/Quantiles_and_counts_per_zipCode.r") 
+
+# specifying a relative path to run the document. Path is relative to the location of the R Markdown document itself. 
+ source(file = "../04_Manipulacion_De_Datos_Data_wrangling/Quantiles_and_counts_per_zipCode.r") 
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+
+price_group_counts_wide[is.na(price_group_counts_wide)] <- 0
+
+q1 <- price_quantiles$q1 %>% scales::dollar()
+q2 <- price_quantiles$q2 %>% scales::dollar()
+q3 <- price_quantiles$q3 %>% scales::dollar()
+
+
+
+```
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (1) Zooming in on High-Rent Zones to Maximized Returns
+</div>
+
+__NOTE:__ Before we begin, it's important to remember that there are various ways to analyze this data. Our aim is to simplify the process and focus more on the different tools that we are using here to create an analysis and share the findings.
+
+Let's dive in! The logic in this first section is simple: the data contains rent prices between 2019 and 2023. If certain zip codes consistently showed higher rents, they might be promising areas for real estate investments. High-rent areas seem to attract certain demographics, such as high-income professionals. This could influence how the unit can be marketed in the future. So, we will group units together based on their rent price quantiles as follows:
+
+
+- __Group1__ has all the units in the data that are renting below __`r q1`__ in the data set<br>
+- __Group2__ has all the units that are renting for more than __`r q1`__ and for less than __`r q2`__ in the data set<br>
+- __Group3__ has all the units that are renting for more than __`r q2`__ and for less than __`r q3`__ in the data set<br>
+- __Group4__ has all the units that are renting for more than __`r q3`__ in the data set
+ 
+We will set our eyes on **Group3 & Group4** zip codes for this analysis. Assuming that a significant number of units in Group3 could potentially transition into Group4 in the future, especially in areas demonstrating growth trends, it's worth considering that these high-rent zones might also coincide with appreciating property values, offering the potential for favorable capital gains over time.
+
+Let's identify areas where most of the units rented belong to Group3 and Group4 by filtering the groups on the below table that meet the below criteria.
+
+ - For Group3, more than 200 units
+ - For Group4, more than 100 units
+
+**INFO:** *Click on the cell that says __'All'__ in the table to filter the data.* 
+
+```{r, echo=FALSE, message=FALSE,  warning=FALSE}
+library(DT)
+# Use DT::datatable() to create a dynamic table
+datatable(price_group_counts_wide, options = list(pageLength = 10),filter = "top")
+
+```
+
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (2) Financial Implications
+</div>
+
+**Grouping the number of units into different buckets/quantiles based on their rent price by __ZipCodes__ can help to answer questions such as What ZipCodes have the higher number of units in groupX? below I put together a general guide on how this data can help:** 
+
+
+__Where to Invest?:__ If certain zip codes consistently demonstrate higher rents, they might be a good place for real estate investments, assuming property prices and operating costs allow for a positive cash flow and return on investment.
+
+__Property Value Appreciation:__ High-rent zip codes might also be areas where property values are rising, which could lead to capital gains over time.
+
+__Understanding Market Trends:__ Looking at areas with high rent can help identify popular or up-and-coming neighborhoods. If a previously low-rent area starts to show increasing rents, it might be an emerging market with investment potential.
+
+__Tenant Demographics:__ High-rent areas might attract certain demographics (e.g., high-income professionals) that can be desirable for landlords. Understanding these demographics could influence the type of properties you invest in and how you market them.
+
+__Rent Pricing Strategy:__ Knowing the areas with higher rent can provide benchmarks when setting rent prices for your own properties, helping to maximize income.
+
+__Risk Assessment:__ High-rent areas may also correlate with factors like lower vacancy rates or lower default rates, which can decrease investment risk. However, they might also be associated with higher property prices, which can increase financial risk. Understanding these trade-offs is important for an investment strategy.
+
+__NOTE:__ Remember that high rents are just one factor to consider in real estate investment. Other factors such as property price, operating costs, tax implications, local regulations, market growth potential, etc., also need to be taken into account. Also, the data to calculate the quantiles above is between 2019 and 2023, but you could filter the data on a specific year as well. Finally, the sizes of zip codes can vary widely in terms of square miles. Some zip codes cover only a small urban area, while others can encompass larger suburban or rural regions.
+
+
+```{r, echo=FALSE, message=FALSE}
+library(lubridate)
+# Models **Review**
+source_doc1   <- "../01_Informacion_Data/models_data/model1_f"
+source_doc2   <- "../01_Informacion_Data/models_data/model2_f"
+source_chunk1 <- "01_Informacion_Data/models_data/model1_f"
+source_chunk2 <- "01_Informacion_Data/models_data/model2_f"
+
+model1_f <- read_rds(file = source_doc1)
+
+
+model2_f <- read_rds(file = source_doc2)
+
+date  <- "2020-01-01"
+date2 <- "2020-12-31" 
+YEAR  <- date %>% year()
+
+library(plotly)
+df <- combined_df %>% filter(bedrooms == 2 & bathrooms == 1 & squareFootage > 700 & squareFootage < 1200 & zipCode == "48220" &
+                         lastSeen >= as.Date(date) & lastSeen <= as.Date(date2)) 
+```
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (3) Data Insights Through Visualization
+</div>
+
+
+The boxplot is a graphical representation of the distribution of a dataset. Here is how this can be useful:
+
+- **Set a criteria: ** Select units that meet the following criteria:
+  + Have 2 bedrooms
+  + Have 1 bathroom
+  + Have a square footage greater than 700 sqft and lower than 1200 sqft
+  + Are located in the zip code '48220'
+
+_This criteria outlines the specific requirements for the units we are interested in, including the number of bedrooms, bathrooms, square footage range, and the targeted zip code._
+
+**The key insights a boxplot provides include:**
+
+**Spread of Data:** The length of the box indicates the range between the first quartile (Q1) and the third quartile (Q3), showcasing where the majority of rent prices lie. The longer the box, the more dispersed the data.
+
+**Central Tendency:** The horizontal line inside the box represents the median (Q2), illustrating the typical rent price. If the median is off-center, it suggests an asymmetrical distribution.
+
+**Outliers:** Individual points outside the "whiskers" (lines extending from the box) are potential outliers. They might signify unusually high or low rent prices compared to the rest of the data.
+
+**Skewness:** The direction in which the boxplot extends can indicate the skewness of the distribution. If the right side (Q3) is longer, the data may be positively skewed, and vice versa.
+
+**Clustering:** Multiple boxplots side by side can highlight rent price variations among different categories or groups, aiding comparison.
+
+**Data Distribution:** The shape of the box and whiskers helps understand if the data is symmetric or skewed and whether it follows a normal distribution.
+
+
+### Boxplot `r YEAR`
+**INFO:** *Feel free to explore the plot further by hovering your cursor over it for additional insights. Moreover, you can interact with the tools located in the upper right corner of the plot to customize your viewing experience.* 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Create an interactive boxplot
+plot_ly(df, y = ~ price , type = "box")
+
+```
+
+### Boxplot Clustering 
+**INFO:** *Feel free to explore the plot further by hovering your cursor over it for additional insights. Moreover, you can interact with the tools located in the upper right corner of the plot to customize your viewing experience.* 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+date <- "2020-01-01"
+library(dplyr)
+library(lubridate)
+library(plotly)
+
+df <- combined_df %>%
+  filter(
+    bedrooms == 2 & bathrooms == 1 & squareFootage > 700 & squareFootage < 1200 & zipCode == "48220" &
+      lastSeen >= as.Date(date)
+  )
+
+# Extract years from the 'lastSeen' column
+df$Year <- year(df$lastSeen)
+
+
+# Create a subplot of boxplots for each year
+subplot_list <- list()
+
+for (yr in 2020:2023) {
+  subplot_list[[as.character(yr)]] <- df %>%
+    filter(Year == yr) %>%
+    plot_ly(y = ~price, type = "box", name = as.character(yr))
+}
+
+subplot(
+  subplot_list$`2020`,
+  subplot_list$`2021`,
+  subplot_list$`2022`,
+  subplot_list$`2023`,
+  nrows = 1
+) 
+
+
+```
+
+### Boxplot Clustering Single Scale
+**INFO:** *Feel free to explore the plot further by hovering your cursor over it for additional insights. Moreover, you can interact with the tools located in the upper right corner of the plot to customize your viewing experience.* 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+date <- "2020-01-01"
+library(dplyr)
+library(lubridate)
+library(plotly)
+
+df <- combined_df %>%
+  filter(
+    bedrooms == 2 & bathrooms == 1 & squareFootage > 700 & squareFootage < 1200 & zipCode == "48220" &
+      lastSeen >= as.Date(date)
+  )
+
+# Extract years from the 'lastSeen' column
+df$Year <- year(df$lastSeen)
+
+# Create a single boxplot with all years
+plot_ly(df, x = ~as.factor(Year), y = ~price, type = "box", boxpoints = "all")
+
+```
+
+**NOTE:** if we are trying to purchase a unit, we can also *visually compare* how a unit that is in Group1 in the boxplot look like against a unit from Group3. Go to a website like [ZILLOW](https://www.zillow.com/){target="_blank"} and look for properties that are in the same ZipCode under the same criteria. (Have 2 bedrooms, Have 1 bathroom, square footage between 700 sqft and 1200 sqft, located at the zip code '48220'). This will help you not only to identify in what range/group does the unit (that you want to rent) belong to, but also how much you could increase rent if you decide to make some small improvements in the property. 
+
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (4) Modeling & Prediction
+</div>
+
+Let's say we want to  make some small improvements in the property. *Modeling & Prediction with linear regression* helps to identify the type of improvements that contribute the most on increasing or decreasing the rent price for a particular unit and a specific area in the data.  
+
+Utilizing Multiple Linear Regression, I dissected rental price influences, highlighting factors like bedrooms and bathrooms as rent-price catalysts. This armed David with new insights.
+
+Here is a simple interpretation of the top 4 factors in the model. We observed that although the number of bathrooms and bedrooms are the top contributors to
+increase the rent price of a unit. The location where this unit resides can also negatively or positively impact the rent price. We can see this on the estimates column. For instance, while zipCode48203 negativaly impact the rent price zipCode48067 positively impact the rent price. Therefore, the model suggest that the zipCode48203 tent to have a lower rent price just because where is located. 
+
+### Linear Regression Model (Top 4 Factors)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+tidy_summary_model2 <- read_rds(file = "../01_Informacion_Data/models_data/tidy_summary_model2")
+
+
+min_p_value_index <- which.min(tidy_summary_model2$p.value)
+
+# Now, let's use this index to highlight the row in the gt table
+tidy_summary_model2 %>% 
+  arrange(p.value) %>%
+  slice(1:12)%>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = "Linear Regression Model (Top 4 Factors)",
+    subtitle = "Key Factors Affecting Rent Price in the Data"
+  ) %>%
+  gt::tab_style(
+    style = list(
+      cell_fill(color = "lightgrey"),
+      cell_text(color = "black"),
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(rows = c(1:4))
+  )
+```
+
+To gain a deeper understanding of why the model penalizes zip code 48203 but not 48067, we can introduce another factor into our analysis. This factor stems from publicly available data gathered from various police departments across metro Detroit. This data rates different zip codes based on their crime levels, as shown in the table below:
+
+### Crime Grades by Zip Code
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+crime <- read_rds(file = "../01_Informacion_Data/Crime_Rates_by_ZipCodes/crime_rating_by_zip.R")
+zip_f <- c("48203", "48067", "48220")
+crime_t <- crime %>% filter(Zipcode %in% zip_f)
+library(kableExtra)
+
+kable(crime_t, format = "html", 
+      caption = "Crime Grades by Zip Code",
+      col.names = c("Zip Code", "Crime Grade")) %>%
+  kable_styling(full_width = FALSE, position = "center")
+```
+
+
+By examining this additional dataset, we can enhance our comprehension of why the model indicates that zip code 48203 has a negative impact on rent prices. If we consider the crime grades, where "A" represents the highest safety and "F" represents the lowest, zip code 48203 is assigned the lowest grade. In simpler terms, this signifies that zip code 48203 offers the least secure environment for renters, which consequently affects the rental prices in that area. This contextual information sheds light on the model's behavior and the observed trends.
+
+
+### Linear Regression Model Rent Estimates
+
+Think of the Linear Regression Model for Rent Estimates as a tool that can predict how much rent you might be able to charge for a specific type of apartment. But it's not just a fixed number – it gives you a range of possible rent prices.
+
+For instance, let's consider a typical apartment with 2 bedrooms, 1 bathroom, and a size between 700 and 1200 square feet. We're focusing on a specific area with the zip code '48220'. This model takes all these details into account and tells us an estimated rent price.
+
+The cool thing is, this  Linear Regression Model doesn't stop at one single number. Instead, it provides a range of prices or **confidence interval**. In this case, the model estimates the rent could be around **$1,649.83**. But it also says it could be a bit lower as **$1,141.72** or a bit higher **$2,157.94** So, it's giving you a sort of "best guess" along with a margin of possible variation.
+
+This was really helpful for David because it cleared up his uncertainty. He could be more confident that the rent he planned to charge would likely cover his costs for running the property. In other words, he could feel more certain that he was making a smart financial decision based on the data and calculations from this model
+
+
+```{r, echo=FALSE, message=FALSE}
+test <- model2_f %>% select(term, estimate, `2.5 %`, `97.5 %`)
+
+
+test2 <- test %>%
+    filter(term  %in% c("(Intercept)", "year2020", "bedrooms", 
+                        "bathrooms","squareFootage" ,"zipCode48220", 
+                        "squareFootage:zipCode48220")) %>%
+    mutate(num_of_bathrooms = 1,
+           num_of_bedrooms  = 2,
+           SqFt             = 900,
+           Year             = 2020,
+           ZipCode          = 48220) %>%
+    mutate(
+        "Model Estimate" = (estimate[1] + estimate[2] + estimate[3] * num_of_bathrooms +
+            estimate[4] * num_of_bedrooms + estimate[5] * SqFt + estimate[6]) %>% scales::dollar(),
+        
+        "Low C.I" = (`2.5 %`[1] + `2.5 %`[2] + `2.5 %`[3] * num_of_bathrooms +
+            `2.5 %`[4] * num_of_bedrooms + `2.5 %`[5] * SqFt + `2.5 %`[6])  %>% scales::dollar(),
+        
+        "High C.I" = ( `97.5 %`[1] + `97.5 %`[2] + `97.5 %`[3] * num_of_bathrooms +
+            `97.5 %`[4] * num_of_bedrooms + `97.5 %`[5] * SqFt + `97.5 %`[6])  %>% scales::dollar()
+    ) %>% select(num_of_bathrooms:"High C.I") %>% head(1)
+
+
+gt::gt(test2) %>%
+  gt::tab_header(
+    title = "Linear Regression Model",
+    subtitle = "Rent Estimation with Linear Regression: Factors and Confidence Intervals"
+  )
+
+
+
+
+
+```
+
+### Linear Regression Model Interactive Plot
+In the plot below, we can see a vivid picture of rent trends. We can observe how the actual rent values align with predicted ones, illuminating the path of potential future rents!
+
+**INFO:** *Feel free to explore the plot further by hovering your cursor over it for additional insights. Moreover, you can interact with the tools located in the upper right corner of the plot to customize your viewing experience.* 
+
+```{r, echo=FALSE, message=FALSE}
+
+# Load the ggplot object from the file
+p <- readRDS("../05_Graficos_Graphics/m2_plot.rds")
+
+# Make the plot interactive
+p_interactive <- ggplotly(p)
+p_interactive
+
+```
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (5) Median Rent Increase Year over Year (ZipCode 48220)
+</div>
+
+
+```{r, echo=FALSE, message=FALSE}
+Rent_increase_year_over_year <- combined_df %>%
+    filter(bedrooms == 2 & bathrooms == 1 & squareFootage > 700 & squareFootage < 1200 & zipCode == "48220" ) %>%
+    select(zipCode, lastSeen, price) %>% 
+    mutate(lastSeen = lastSeen %>% as.Date()) %>% 
+    mutate(lastSeen = lastSeen %>% floor_date(unit = "year")) %>% 
+    group_by(lastSeen) %>% 
+    summarise(median_rent = median(price), .groups = "drop") %>%
+    mutate(yoy_growth = (median_rent/lag(median_rent) - 1)) %>%
+    mutate(yoy_growth2 = yoy_growth %>% percent() ) %>% pull(yoy_growth) %>% median(na.rm = TRUE) %>% percent()
+```
+
+Imagine David. He finds out that the estimated median rent for a 2 bedrooms 1 bathroom unit that is between 700 and 1200 square footage in the area (ZipCode 48220) has been treading up by **`r Rent_increase_year_over_year`** every year in the past 4 years. 
+
+Here's how that **`r Rent_increase_year_over_year`** increase helps David in his investment:
+
+  - **More Money Yearly:** Estimate how much extra rent David will get each year. This helps him plan for expenses and profits.
+  - **Property Value Boost:** With rents increasing regularly, David sees his property's value grow steadily over time.
+  - **Selling Advantage:** If David sells later, rising rents make his property more attractive to buyers, possibly leading to a better selling price.
+  - **Stronger Finances:** Increasing rent means more cash flow for David, making it easier to handle costs and upkeep.
+  - **Inflation Shield:** Rent increases often match inflation, protecting David from inflation rising prices.
+  - **Confident Choices:** Armed with this info, David feels more confident making investment decisions.
+  - **Choosing Wisely:** When comparing properties, a **`r Rent_increase_year_over_year`** rise in rent helps David pick the one with better long-term potential.
+  - **Easier Financing:** Knowing rents grow can help David secure favorable loan terms from lenders.
+
+In short, the **`r Rent_increase_year_over_year`** annual rent increase gives David a solid financial outlook, helping him plan, invest, and prosper in the long run.
+<br>
+<br>
+
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (6) Net Present Value (NPV) A Tale of Data-Driven Insights
+</div>
+
+**Net Present Value (NPV):** NPV looks at the present value of all future cash flows generated by a project while considering the initial capital investment, in order to determine whether the investment will be profitable. **NPV** allows us to look at the whole picture of an investment by factoring in these key inputs:
+
+- How much money are you putting into an investment?
+- How much money are you generating in return?
+- When are your returns realized?
+- What could you earn on your money if you invested it elsewhere (discount rate)
+
+By taking all of those inputs into account, NPV produces a single metric that tells us whether a deal will make us more or less money than our alternative investment(given that investment's discount rate). Remember, NPV tells us the value of the investment in today's dollars, so we can compare it to today's cost of doing the investment. 
+
+To better illustrate the concepts we have discussed, we are going to assumed that David is purchasing a property with 2 units (A Duplex) for $232,000 with a 20% down payment of $46,400 and $50,000 for repairs. Let's create a Digital Investment Matrix to help David's journey to make an informed investment decision on this purchase. The matrix outlines essential parameters—loan amounts, rental projections, and more—to lay the groundwork for his financial path. Year by year, the report unfolds a financial plan, capturing evolving rents, expenses, and taxes. It showcases the cumulative growth for the rental income, both nominal and present values, serving as a solid foundation for David's choices. 
+
+We are going to use the following inputs for the Digital Investment Matrix:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE }
+
+################################################################################
+#NOTE: the risk of vacancy has to be mentioned for the 15 year time period 
+######################################################################################
+# Parameters
+loan_amount        <- (232000-46400)  # Loan amount in 
+initial_investment <- 46400 + 50000 # 23200+20000    # Initial investment in $
+# Asset2_Interest_Earned   <- 0.04      # for instance Savings account interest rate
+discount_rate      <- 0.1470# 0.10      # it is used to 'discount' future cash flows back to the present to understand their value in today's terms
+initial_rent       <- (16260*2) # Initial Annual rent in $. Multiply by num of units | 1466.02 - (1466.02 *0.10)
+rent_increase      <- 0.07      # Annual increase in rent
+years              <- 10        # Investment period in years
+initial_tax        <- 8600      # Initial annual tax in $11000
+tax_increase       <- 0.05      # Annual tax increase
+loan_interest      <- 0.0225      # Annual loan interest rate
+loan_term          <- 30        # Loan term in years
+# pmi_rate           <- 0.008     # Annual PMI rate # 0.008
+home_insurance     <- 1000      # Annual Homeowner's insurance
+initial_E.Funds    <- 200*12    # Initial annual E.Funds in $ (Monthly E.Funds * 12)
+expense_increase   <- 0.05      # Annual increase in E.Funds
+
+
+
+loan_amount_ch            <- loan_amount %>% scales::dollar()
+initial_investment_ch     <- initial_investment %>% scales::dollar()
+# Asset2_Interest_Earned_ch <- Asset2_Interest_Earned %>% scales::percent()
+discount_rate_ch          <- discount_rate %>% scales::percent()
+initial_rent_ch           <- initial_rent %>% scales::dollar()
+rent_increase_ch          <- rent_increase  %>% scales::percent()
+years                     <- years
+initial_tax_ch            <- initial_tax %>% scales::dollar()
+tax_increase_ch           <- tax_increase %>% scales::percent()
+loan_interest_ch          <- loan_interest %>% scales::percent()
+loan_term                 <- loan_term
+#pmi_rate_ch               <- pmi_rate %>% scales::percent()
+home_insurance_ch         <- home_insurance %>% scales::dollar()
+initial_E.Funds_ch        <- initial_E.Funds  %>% scales::dollar()
+expense_increase_ch       <- expense_increase %>% scales::percent()
+
+
+```
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(htmltools)
+
+table1 <- data.frame(
+  Item = c("<strong>Loan Amount</strong>", 
+            "<strong>Loan Term in Years </strong>",
+           "<strong>Annual Loan Interest Rate</strong>",
+           "<strong>Initial Investment</strong>",
+           "<strong>Discount Rate</strong>",
+           "<strong>Total Annual Rent per Unit</strong>",
+           # "<strong>Annual Rent Increase</strong>",
+           "<strong>Investment Time Period in Years</strong>"),
+  
+  Value = c(loan_amount_ch,
+            loan_term,
+            loan_interest_ch,
+            initial_investment_ch,
+            discount_rate_ch,
+            initial_rent_ch, 
+            # rent_increase_ch,
+            years)
+)
+
+table2 <- data.frame(
+  Item = c( "<strong>Annual Property Taxes</strong>",
+            "<strong>Annual Rate Increase in Property Taxes</strong>",
+          # "<strong>Annual Loan Interest Rate</strong>",
+           # "<strong>Annual PMI Rate </strong>",
+           "<strong>Annual Rent Increase</strong>",
+           "<strong>Annual Home Insurance </strong>",
+           "<strong>Initial Annual Emergency Funds </strong>",
+           "<strong>Emergency Funds Annual Increase</strong>"),
+  
+  Value = c(initial_tax_ch,
+            tax_increase_ch,
+           # loan_interest_ch,
+            
+            # pmi_rate_ch,
+            rent_increase_ch,
+            home_insurance_ch,
+            initial_E.Funds_ch,
+            expense_increase_ch)
+)
+
+html_output <- div(
+  class = "row",
+  div(
+    class = "col-md-6",
+    withTags(ul(HTML(paste0("<li>", table1$Item, ":", table1$Value, "</li>"))))
+  ),
+  div(
+    class = "col-md-6",
+    withTags(ul(HTML(paste0("<li>", table2$Item, ":", table2$Value, "</li>"))))
+  )
+)
+
+html_output
+
+
+```
+
+These parameters lay the foundation for the comprehensive Digital Investment Matrix, that David needs to better understand his financial outcomes.
+
+**NOTE:** _The Discount Rate_ is a vital part of all TVM calculations. But this value can be tremendously difficult to approximate accurately, if we're not sure what we're comparing our investment to.
+
+Let's provide David with some examples on how to define his discount rate, discount rate will relate to opportunity cost- it will be the rate that we believe we can earn if we had the money now and were to invest it in another opportunity. But, depending on the situation, discount rate could also represent something else.
+
+For example, discount rate could be the rate at which we originally borrowed the funds for this project, and at which we are currently repaying the loan. Or the discount rate could simply be the rate of return that we want to achieve to make the deal worthwhile to us. Or Perhaps we did some retirement planning and determined that we needed to earn a 12 percent rate of return between now and retirement to hit our goals, so we use a 12 percent discount rate in our model.
+
+For this reason, discount rate is often referred to as the "hurdle" or "hurdle rate." It's the hurdle we have to surpass to achieve our required or desired rate of return.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE }
+
+
+# Calculate annual loan payment
+Loan <-  (loan_interest * loan_amount) / (1 - (1 + loan_interest)^(-loan_term))
+
+# Create an empty tibble to store results
+results <- tibble()
+
+# Initialize variable for cumulative present value of rental income
+cumulative_PV_rental_income <- 0
+
+# Loop over each year
+for (year in 1:years) {
+    
+    # Adjust the rent, E.Funds, & tax for the annual increase
+    rent    = initial_rent * (1 + rent_increase)^(year - 1)
+    E.Funds = initial_E.Funds * (1 + expense_increase)^(year - 1)
+    tax     = initial_tax * (1 + tax_increase)^(year - 1)
+    
+    # Calculate PMI payment
+    # pmi_payment = pmi_rate * loan_amount 
+    
+    # Add PMI, Home Insurance, & tax to the Escrow
+    Escrow = home_insurance + tax # + pmi_payment
+    
+    T.Expenses = E.Funds + Loan + Escrow
+    
+    # Calculate the net rent after tax, loan payment and E.Funds
+    net_rent = rent - T.Expenses
+    
+    # Calculate the present value of the net rent for this year, discounted back to present
+    PV_year = net_rent  / (1 + discount_rate)^year
+    
+    # Add this year's present value of net rent to cumulative present value of rental income
+    cumulative_PV_rental_income = cumulative_PV_rental_income + PV_year
+    
+    # Calculate Future Value of savings account for each year
+    # FV_savings <-  initial_investment * (1 + Asset2_Interest_Earned)^year
+    
+    # Create a tibble with all calculations for this year
+    yearly_results <- tibble(
+        Year                   = year,
+        Rent                   = rent  %>% dollar(),
+        Loan                   = Loan  %>% dollar(),
+        #PMI                    = pmi_payment %>% dollar(),
+        HomeInsu               = home_insurance %>% dollar(),
+        Tax                    = dollar(tax),
+        E.Funds                = E.Funds %>% dollar(),
+        T.Expenses             = T.Expenses %>% dollar(),
+        Net_Rent_int           = net_rent,
+        NetRent               = dollar(net_rent),
+        PV_NetRent            = PV_year %>% dollar(),
+        PV_Net_Rent_int        = PV_year,
+        Cumulative_PV_Rental_Income = cumulative_PV_rental_income,
+        CPV_NetRent      = dollar(cumulative_PV_rental_income)
+        #FValue_of_Asset2_Income    = FV_savings,
+        #FV_Asset2           = dollar(FV_savings)
+    )
+    
+    # Add this year's results to the overall results tibble
+    results <- bind_rows(results, yearly_results)
+}
+
+# Calculate percentage difference
+# percentage_difference = ((results$Cumulative_PV_Rental_Income[years] - results$FValue_of_Asset2_Income[years]) / results$FValue_of_Asset2_Income[years])
+
+# Add a column to the results tibble for the percentage difference
+# results <- results %>%
+#     mutate(Pct_Rental_vs_Asset2 = percentage_difference %>% percent(accuracy = 0.01))
+
+
+# library(FinancialMath)
+# cash_flows <- results %>% pull(Net_Rent_int) 
+# cash_flows
+# n <- results %>% pull(Net_Rent_int) %>% length()
+# n
+# initial_investment <- 100000 
+# irr_value <- IRR(cf0 = initial_investment, cash_flows, times = 1:n)
+# irr_value %>% scales::percent(accuracy = 0.01)
+
+
+f_results <- results %>% select(- Cumulative_PV_Rental_Income,  - PV_Net_Rent_int, - Net_Rent_int) #- FValue_of_Asset2_Income,
+
+gt::gt(f_results) %>%
+    gt::tab_header(
+        title = "A Tale of Data-Driven Insights",
+        subtitle = "Empowering Informed Choices and Secure Pathways"
+    ) # %>% tab_options(table.width = "10%")
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+n <- f_results %>% nrow()
+Total_CPV_NetRent_ch <- f_results %>% select(CPV_NetRent) %>% slice(n) 
+
+Total_CPV_NetRent <- as.numeric(gsub("[^0-9.]", "", Total_CPV_NetRent_ch))
+
+
+NPV <- (Total_CPV_NetRent + (-initial_investment)) %>% scales::dollar()
+
+
+```
+
+<br>
+
+
+The Net Present Value (NPV) formula is given by:
+
+\[
+NPV = \sum_{t=0}^{T} \frac{CF_t}{(1 + r)^t} 
+\]
+
+Where:
+- \( NPV \) is the Net Present Value.
+- \( T \) is the total number of periods.
+- \( CF_t \) represents the cash flow at time \( t \).
+- \( r \) is the discount rate.
+
+<br>
+
+<div style="text-align: center;">
+
+##### **NPV =** (-`r initial_investment_ch`) + `r Total_CPV_NetRent_ch` = **`r NPV`**
+</div>
+
+**Something regarding selling of the property need to be added into the equation after the 10 yr period in the story**
+
+#### **Interpreting The Results**
+One of the nice things about NPV is that the results are simple to interpret. If NPV is negative, you would lose money on the deal (taking the time value of the money into account). If NPV is positive, you would gain money on the deal. A good rule of thumb is that if NPV is positive, it's an opportunity you should consider pursuing. If the NPV is negative, it's an opportunity that should be ruled out (or renegotiated). NPV works for any deal where you have multiple inflows and out flows of cash over an extended period of time.
+
+Whether an investment opportunity will make us money is obviously a tremendously important question to answer. But once we know that an investment is good, we start to ask ourselves an equally important question: 
+
+How good is it? This is where the internal rate of return (IRR) comes in.
+
+<style>
+.sticky-title {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 5px;
+    border-bottom: 2px solid #ddd;
+    z-index: 1000;
+}
+</style>
+
+<div class="sticky-title">
+### (7) Mini Rmarkdowm App to Calculate Internal Rate of Return (IRR)
+</div>
+
+
+To start, IRR can tell us how profitable an investment is. And just as importantly, IRR can help us evaluate investments with variable inflows and outflows of capital over time. Specifically, IRR is a value that indicates the compounded return of the investment over time, given the different timing of money going in and money coming out of the project.
+
+This is our NPV number **`r NPV`** from the analysis, which calculated a positive NPV- indicating the investment is worth pursuing and our return would surpass the **`r discount_rate_ch`**  hurdle (discount rate).
+
+NPV indicated that this deal is worth pursuing, but it doesn't answer the question of how worth pursuing it is. It tells us that our return would beat **`r discount_rate_ch`**, but it doesn't tell us exactly how much it would beat **`r discount_rate_ch`** or what the actual rate of return would be. Except that it can!
+
+By identifying the discount rate where the NPV = 0, we can isolate the exact compounded rate of return we should expect on this investment. Knowing the discount rate that makes the NPV = 0 tells us the compounded rate of return for this particular investment. 
+
+In other words, if we were to invest in this specific deal, we should expect a compounded annual return of exactly **XX percent**. We already knew it was higher than **`r discount_rate_ch`**  because the NPV for this deal was positive, but now we know exactly what it is which is essential when comparing investments against one another.
+
+The name of the specific discount rate that makes NPV = 0 is the IRR. The IRR on this deal is **XX percent**.
+Internal rate of return (IRR) is the discount rate that makes NPV = 0 for an investment; IRR is the compounded return of that investment.
+
+IRR is both a discount rate and a rate of return metric. IRR is one of the most common return metrics used in commercial real estate (and even some residential real estate) analysis, so its important to understand both where it comes from and how it's used. For now, the key takeaways are where IRR comes from (again, the discount rate that makes an NPV analysis equal to zero) and how it relates to the concept of TVM.
+
+When the net present value (NPV) is equal to zero, it indicates that the project's inflows and outflows are balanced, and the project is expected to generate exactly the required rate of return. In other words, the investment is expected to yield a return that matches the cost of capital or the minimum acceptable rate of return. This situation is often referred to as the "break-even point" for the project, where the returns just cover the costs, resulting in no net gain or loss. For instance, in our case we are using a discount rate of **`r discount_rate_ch`** but the net present value (NPV) that we are getting is **`r NPV`** which is higher than zero this means that are return in this investment is higher than the  discount rate of **`r discount_rate_ch`** but how much exactly? what is David's return on this investment of **`r initial_investment_ch`**
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+NetRent_ch  <- f_results %>% select(NetRent)
+
+# Remove "$" and commas, then convert to integer
+NetRent_int <-  NetRent_ch %>%
+  mutate(NetRent = as.numeric(str_remove_all(NetRent, "[$,]"))) %>% pull(NetRent)
+
+#cash_flows <- c(2000, 2000, 2000, 2000, 130000)
+cash_flows <- NetRent_int # c(8596.145, 10647.745, 12879.973, 15308.104, 17948.677, 20819.597, 23940.246, 27331.605, 31016.385, 35019.165)
+irr_value <- IRR(cf0 = 96400, cash_flows, times = 1:10)
+irr_value <- irr_value %>% scales::percent(accuracy = 0.01)
+str_glue("Internal Rate of Return options: {irr_value}")
+
+
+```
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# library(FinancialMath)
+# cash_flows <- results %>% pull(Net_Rent_int) 
+# n <- results %>% pull(Net_Rent_int) %>% length()
+# initial_investment <- 100000 
+# irr_value <- IRR(cf0 = initial_investment, cash_flows, times = 1:n, plot = TRUE)
+# irr_value[3] %>% scales::percent(accuracy = 0.01)
+
+```
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(shiny)
+library(tidyverse)
+library(scales)
+library(glue)
+library(gt)
+library(FinancialMath)
+
+ui <- fluidPage(
+  titlePanel("Rental Vs Savings"),
+
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("loan_amount", "Loan amount", value = 220000, min = 0, step = 5000),
+      numericInput("initial_investment", "Initial investment", value = 100000, min = 0, step = 1000),
+      numericInput("discount_rate", "Discount rate", value = 0.04, min = 0, max = 1, step = 0.01),
+      numericInput("initial_rent", "Initial Annual rent", value = (16260*2), min = 0, step = 100),
+      numericInput("rent_increase", "Annual increase in rent", value = 0.08, min = 0, max = 1, step = 0.01),
+      numericInput("years", "Investment period in years", value = 10, min = 1, max = 100, step = 1),
+      numericInput("initial_tax", "Initial annual tax", value = 8600, min = 0, step = 100),
+      numericInput("tax_increase", "Annual tax increase", value = 0.05, min = 0, max = 1, step = 0.01),
+      numericInput("loan_interest", "Annual loan interest rate", value = 0.0225, min = 0, max = 1, step = 0.001),
+      numericInput("loan_term", "Loan term in years", value = 30, min = 1, max = 100, step = 1),
+      numericInput("pmi_rate", "Annual PMI rate", value = 0.008, min = 0, max = 1, step = 0.001),
+      numericInput("home_insurance", "Annual Homeowner's insurance", value = 1000, min = 0, step = 50),
+      numericInput("initial_E.Funds", "Initial annual E.Funds", value = (200*12), min = 0, step = 100),
+      numericInput("expense_increase", "Annual increase in E.Funds", value = 0.05, min = 0, max = 1, step = 0.01)
+    ),
+
+    mainPanel(
+      gt_output("table"),
+      verbatimTextOutput("irr")
+    )
+  )
+)
+
+server <- function(input, output) {
+
+  output$table <- render_gt({
+
+    # Your reactive inputs
+    loan_amount        <- input$loan_amount
+    initial_investment <- input$initial_investment
+    discount_rate      <- input$discount_rate
+    initial_rent       <- input$initial_rent
+    rent_increase      <- input$rent_increase
+    years              <- input$years
+    initial_tax        <- input$initial_tax
+    tax_increase       <- input$tax_increase
+    loan_interest      <- input$loan_interest
+    loan_term          <- input$loan_term
+    pmi_rate           <- input$pmi_rate
+    home_insurance     <- input$home_insurance
+    initial_E.Funds   <- input$initial_E.Funds
+    expense_increase   <- input$expense_increase
+
+    results <- data.frame(
+      Year         = 1:years,
+      Rent         = numeric(years),
+      Loan         = numeric(years),
+      Escrow       = numeric(years),
+      T.Expenses   = numeric(years),
+      Net_Rent     = numeric(years),
+      PV_Rent      = numeric(years),
+      Cumulative_PV_Rent  = numeric(years)
+    )
+
+# Calculate annual loan payment
+Loan <-  (loan_interest * loan_amount) / (1 - (1 + loan_interest)^(-loan_term))
+cumulative_PV_rental_income <- 0
+
+    for (year in 1:years) {
+
+      # Adjust the rent, E.Funds, and tax for the annual increase
+      rent    = initial_rent    * (1 + rent_increase)^(year - 1)
+      E.Funds = initial_E.Funds * (1 + expense_increase)^(year - 1)
+      tax     = initial_tax     * (1 + tax_increase)^(year - 1)
+
+
+      # Calculate annual PMI payment
+      pmi_payment = pmi_rate * loan_amount
+
+      # Add PMI, Home Insurance, & tax to the Escrow
+      Escrow = pmi_payment + home_insurance + tax
+
+      T.Expenses = E.Funds + Loan + Escrow
+
+      net_rent = rent - T.Expenses
+
+      # Calculate the present value of the net rent for this year, discounted back to present
+      PV_year = net_rent  / (1 + discount_rate)^year
+
+       # Add this year's present value of net rent to cumulative present value of rental income
+      cumulative_PV_rental_income = cumulative_PV_rental_income + PV_year
+
+
+      results[year, "Rent"]               = rent %>% dollar()
+      results[year, "Loan"]               = Loan %>% dollar()
+      results[year, "Escrow"]             = Escrow %>% dollar()
+      results[year, "T.Expenses"]         = T.Expenses %>% dollar()
+      results[year, "Net_Rent"]           = net_rent %>% dollar()
+      results[year, "PV_Rent"]            = PV_year %>% dollar()
+      results[year, "Cumulative_PV_Rent"] = cumulative_PV_rental_income %>% dollar()
+
+    }
+
+    # Calculate IRR
+    cash_flows <- results %>% pull(Net_Rent) %>% parse_number()
+    n <- length(cash_flows)
+    irr_value <- IRR(cf0 = initial_investment, cash_flows, times = 1:n)
+    irr_value <- irr_value %>% scales::percent(accuracy = 0.01)
+
+    # Assign IRR value to the reactive variable
+    output$irr <- renderText({
+      paste("The Internal Rate of Return (IRR) is: ", irr_value)
+    })
+
+    results %>%
+      gt::gt() %>%
+      gt::tab_header(
+        title = "Investment schedule",
+        subtitle = "Future and Present Values of Rent and Savings"
+      )
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+```
+
+IRR is just a way to evaluate project. To accept or reject the project. 
+if (NPV > 0) then, accept.
+the NPV determine if an investment make sense to pursue. if NPV is positive, it's an investment that will make money. if NPV is negative, it's an investment that's going to lose money. this is great, but how good is the investment? it makes money, but how much money? this is where internal rate of return can be used. The IRR can tell us how profitable an investment is. IRR can help us to evaluate investments with variable inflows and outflows of capital over time. In other words, IRR is a value that indicates the compounded return of the investment over time given the different timing of money going in and money coming out of the project. 
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>

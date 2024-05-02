@@ -1,0 +1,233 @@
+## ____________________________________
+##
+## Script name: data_import_script.R
+##
+## Purpose of script: Importing Data to Rstudio
+##
+## Prerequisites: 
+##              * Excel data files most be closed to read them into Rstudio
+##              * Excel data files need to be in the location/path provided in the function
+##
+## Parameters: 
+##            * dataSource
+##            * unzipData
+##
+## Results: NA
+##
+## Return codes: 
+##                  0 - Success: Data set has been successfully loaded.
+##                  1 - Error  : Unzip functionality is not set for the {dataSource} data set
+##                  2 - Error  : The input/argument for the parameter unzipData is invalid {unzipData}, please use inputs such as 1 or 0
+##                  3 - Error  : Error 3: The input/argument for the parameter dataSource {dataSource} is invalid, please use inputs such as Employment, Zillow, LandArea, and Population
+##
+## Author: IDSA
+##
+## Date Created: 2023-08-06
+##
+## Copyright (c) IDSA, 2023
+## Email: <email>@IDSA.com
+## _______________________________________________________________________
+##> Notes:
+##> 
+##> The function data_import can import data from different sources such as
+##> Employment, Zillow, Population, and LandArea. It can also check
+##> for errors such as incorrect input of argument values and unzip folders to 
+##> extract data.
+## _______________________________________________________________________
+##
+## M O D I F I C A T I O N   H I S T O R Y
+##
+## 06AUG2023    person0
+## Changes:     Initial Version.
+##
+## 06AUG2023    person1
+## Changes:     - Changes xxx
+##
+## 07AUG2023    person2
+## Changes:     - Removed xxx
+##              - Start xxx
+##
+## 08AUG2023    person3
+## Changes:     - Errors are redirected to xxxx
+##                
+##
+##________________________________________________________________________
+
+# Packages 
+library(readxl)
+library(tidyverse)
+library(lubridate)
+library(stringr)
+library(fs)
+
+data_import <- function(dataSource, unzipData = 0) {
+    
+    # Employment ----
+    ## IF a.1 ----
+    if (dataSource == "Employment" & unzipData == 0) {
+        
+       
+        Employment <- read_excel(path  = "01_Informacion_Data/Bureau_Labor_of_Statistics_Data/Detroit_Warren_Dearborn_202285.xlsx",
+                                 sheet = "BLS Data Series",
+                                 skip  = 10)
+        
+        return(Employment)
+    }
+  
+    # Zillow ----
+    ## IF a.1 ----
+    if (dataSource == "Zillow" & unzipData == 0) {
+        
+        Zillow <- read_excel(path = "01_Informacion_Data/Zillow/Zip_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month_8_5_2022.xlsx")
+        
+        return(Zillow)
+    }
+   
+    
+    # Population ----
+    ## IF a.1 ----
+   if (dataSource == "Population" & unzipData == 1) {
+       
+       my_dir      <- "01_Informacion_Data/US_Census_Bureau/"
+       
+       files_check <- list.files(path = my_dir,
+                                 pattern = "*.csv" ,
+                                 full.names = TRUE) 
+       
+       zip_files <- list.files(path = my_dir,
+                               pattern = "*.zip" ,
+                               full.names = TRUE)
+       ## IF a.2 ----
+       if (length(files_check)  > 0 ) {
+
+           print(str_glue("Files have already been unzip, please check your directory: {my_dir}"))
+           
+           
+           }
+       
+       
+       ## IF a.3 ----
+       if (length(files_check)  == 0 ) {
+           
+           unzip_files <- zip_files %>% map(.f = unzip, exdir = my_dir) 
+           
+           data_files <- list.files(path = my_dir,
+                                    pattern = "*Data.csv" ,
+                                    full.names = TRUE)
+           
+           pop_data <- map(.x = data_files, .f = read.csv, skip = 1, header = TRUE)
+           
+           for (i in 1:length(pop_data)) {
+               
+               pop_data[[i]]$Year <- 2010 + i
+           }
+           
+           pop_data <- map_dfr(.x = pop_data, .f = pluck)
+           
+           pop_data <- pop_data %>% select(starts_with(match = "Geographic"),
+                                           starts_with(match = "Estimate"),
+                                           Year)
+           
+           
+           return(pop_data)
+           
+           }
+      }
+       
+       ## IF b.1 ----
+       if (dataSource == "Population" & unzipData == 0) {
+           
+           my_dir    <- "01_Informacion_Data/US_Census_Bureau/"
+           
+           files_check <- list.files(path = my_dir,
+                                     pattern = "*.csv" ,
+                                     full.names = TRUE) 
+           
+           
+           ## IF b.2 ----
+           if (length(files_check)  == 0 ) {
+               
+               print(str_glue("Files have NOT been unzip, please check your directory: {my_dir}"))
+               
+               
+           }
+           
+           
+           ## IF b.3 ----
+           if (length(files_check)  > 0 ) {
+               
+               data_files <- list.files(path = my_dir,
+                                        pattern = "*Data.csv" ,
+                                        full.names = TRUE)
+               
+               pop_data <- map(.x = data_files, .f = read.csv, skip = 1, header = TRUE)
+               
+               for (i in 1:length(pop_data)) {
+                   
+                   pop_data[[i]]$Year <- 2010 + i
+               }
+               
+               pop_data <- map_dfr(.x = pop_data, .f = pluck)
+               
+               pop_data <- pop_data %>% select(starts_with(match = "Geographic"),
+                                               starts_with(match = "Estimate"),
+                                               Year)
+               
+               
+               return(pop_data)
+               
+           }
+           
+       
+       
+   }
+    
+    # Land Area ----
+    ## IF a.1 ----
+    if (dataSource == "LandArea" & unzipData == 0) {
+        
+        landArea           <- read_excel(path = "01_Informacion_Data/Land_Area/LandArea.xlsx")
+        landArea           <- landArea %>% filter(STATE == "MI") %>% select(-STATE)
+        colnames(landArea) <- c("Loc_Zip_id", "Land_Area", "City")
+        
+        return(landArea)
+        
+    }
+  
+  # Error check ----
+  ## IF a.1 ----
+  if ((dataSource == "Employment" | dataSource == "Zillow"  |  dataSource == "LandArea") & unzipData == 1) { 
+    
+    print(str_glue("Error 1: Unzip functionality is not set for the input/argument {dataSource} data set")) 
+    
+  }
+  
+  ## IF a.2 ----
+  if (unzipData != 1 & unzipData != 0) { 
+    
+    print(str_glue("Error 2: The input/argument for the parameter unzipData {unzipData} is invalid, please use inputs such as 1 or 0")) 
+    
+  }
+  
+  ## IF a.3 ----
+  if (dataSource != "Employment" & dataSource != "Zillow"  &  dataSource != "LandArea" & dataSource != "Population") { 
+    
+    print(str_glue("Error 3: The input/argument for the parameter dataSource {dataSource} is invalid,
+                   please use inputs such as Employment, Zillow, LandArea, and Population")) 
+    
+  }
+
+    
+}
+
+dir_tree()
+# Testing the function ----
+# Employment, Zillow, Population, LandArea
+# data_import(dataSource = "Population", unzipData = 1)
+
+
+
+
+
+
+
